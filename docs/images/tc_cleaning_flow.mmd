@@ -1,0 +1,32 @@
+flowchart TD
+    subgraph Input["输入"]
+        TC_JSON["📋 测试用例 JSON 文件<br/>（含元数据 + 源文件路径）"]
+        TC_PY["📄 Python 测试用例源文件<br/>（class Test_* 类）"]
+    end
+
+    subgraph Pipeline["清洗管道"]
+        direction TB
+        READ["① Read<br/>TestCaseJsonReader<br/>─────────────<br/>读取 JSON 元数据<br/>加载 .py 源文件"]
+        PARSE["② Parse<br/>ASTParseStage + TestCaseParser<br/>─────────────<br/>AST 解析 class Test_*<br/>提取 preCondition/testSteps/postCondition 方法源码"]
+        EXTRACT["③ Extract<br/>DocstringExtractStage + TestCaseDocstringParser<br/>─────────────<br/>解析类 docstring<br/>提取步骤描述列表"]
+        ENRICH["④ Enrich<br/>TestCaseEnrichStage<br/>─────────────<br/>匹配 tc.logInfo 与步骤<br/>关联步骤描述和实现代码"]
+        WRITE["⑤ Write<br/>TestCaseFileWriter<br/>─────────────<br/>每个用例输出一个 JSON"]
+    end
+
+    subgraph Output["输出"]
+        TC_OUT["📋 增强后的 JSON<br/>（含元数据 + 步骤 + 实现代码）"]
+    end
+
+    TC_JSON --> READ
+    TC_PY --> READ
+    READ --> PARSE
+    PARSE --> EXTRACT
+    EXTRACT --> ENRICH
+    ENRICH --> WRITE
+    WRITE --> TC_OUT
+
+    style READ fill:#4A90D9,color:#fff
+    style PARSE fill:#4A90D9,color:#fff
+    style EXTRACT fill:#4A90D9,color:#fff
+    style ENRICH fill:#D94A4A,color:#fff
+    style WRITE fill:#4A90D9,color:#fff

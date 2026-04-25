@@ -1,0 +1,146 @@
+classDiagram
+    class PipelineStage {
+        <<abstract>>
+        +process(data) Any
+    }
+
+    class Pipeline {
+        -stages: List~PipelineStage~
+        +add_stage(stage) Pipeline
+        +run(initial_data) Any
+    }
+
+    class PipelineConfig {
+        +input_paths: List~str~
+        +output_dir: str
+        +source_root: str
+        +options: dict
+    }
+
+    class PipelineBuilder {
+        +build_test_case_pipeline(config)$ Pipeline
+        +build_aw_pipeline(config)$ Pipeline
+    }
+
+    class ReadStageBase {
+        <<abstract>>
+        +process(data) List~RawSourceFile~
+        #_validate_config(data) void
+        #_read_sources(data)* List~RawSourceFile~
+    }
+
+    class TestCaseJsonReader
+    class AWJsonReader
+
+    class ASTParseStage {
+        -parser: SourceParser
+        +process(data) List~Tuple~
+    }
+
+    class DocstringExtractStage {
+        -docstring_parser: DocstringParser
+        +process(data) List~Tuple~
+    }
+
+    class EnrichStageBase {
+        <<abstract>>
+        -enricher: Enricher
+        +process(data) List~CorpusItem~
+    }
+
+    class TestCaseEnrichStage
+    class AWEnrichStage
+
+    class WriteStageBase {
+        <<abstract>>
+        +process(items) void
+        #_write_output(items)* void
+    }
+
+    class TestCaseFileWriter
+    class AWAggregateWriter
+
+    class SourceParser {
+        <<abstract>>
+        +parse(raw) List~ParsedEntity~
+    }
+    class TestCaseParser
+    class AWFunctionParser
+
+    class DocstringParser {
+        <<abstract>>
+        +parse_docstring(docstring) DocstringStructure
+    }
+    class TestCaseDocstringParser
+    class AWDocstringParser
+
+    class Enricher {
+        <<abstract>>
+        +enrich(raw, structured) List~CorpusItem~
+    }
+    class TestCaseEnricher
+    class AWEnricher
+
+    class RawSourceFile {
+        +file_path: str
+        +source_code: str
+        +metadata: dict
+    }
+
+    class ParsedEntity {
+        +name: str
+        +docstring: str
+        +method_implementations: Dict
+        +body_source: str
+    }
+
+    class TestCaseCorpusItem {
+        +metadata: dict
+        +test_case_number: str
+        +test_case_name: str
+        +pre_conditions: List~StepDetail~
+        +test_steps: List~StepDetail~
+        +post_conditions: List~StepDetail~
+    }
+
+    class AWCorpusItem {
+        +function_name: str
+        +description: str
+        +implementation_code: str
+    }
+
+    class StepDetail {
+        +description: str
+        +log_info: str
+        +implementation_code: str
+    }
+
+    Pipeline "1" o-- "0..*" PipelineStage : stages
+    PipelineBuilder ..> Pipeline : creates
+    PipelineBuilder ..> PipelineConfig : uses
+
+    PipelineStage <|-- ReadStageBase
+    PipelineStage <|-- ASTParseStage
+    PipelineStage <|-- DocstringExtractStage
+    PipelineStage <|-- EnrichStageBase
+    PipelineStage <|-- WriteStageBase
+
+    ReadStageBase <|-- TestCaseJsonReader
+    ReadStageBase <|-- AWJsonReader
+    EnrichStageBase <|-- TestCaseEnrichStage
+    EnrichStageBase <|-- AWEnrichStage
+    WriteStageBase <|-- TestCaseFileWriter
+    WriteStageBase <|-- AWAggregateWriter
+
+    ASTParseStage *-- SourceParser : 组合
+    DocstringExtractStage *-- DocstringParser : 组合
+    EnrichStageBase *-- Enricher : 组合
+
+    SourceParser <|-- TestCaseParser
+    SourceParser <|-- AWFunctionParser
+    DocstringParser <|-- TestCaseDocstringParser
+    DocstringParser <|-- AWDocstringParser
+    Enricher <|-- TestCaseEnricher
+    Enricher <|-- AWEnricher
+
+    TestCaseCorpusItem *-- "0..*" StepDetail
