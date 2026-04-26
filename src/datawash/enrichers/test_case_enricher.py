@@ -9,6 +9,23 @@ from .enricher import Enricher
 
 
 class TestCaseEnricher(Enricher):
+    # ============================================================
+    # [字段映射] 定义输入 JSON 字段 → 输出 JSON 字段的映射
+    # 格式: "输入字段名": "输出字段名"
+    # - 需要改名：如 "source_file_path": "file_path"
+    # - 同名透传：如 "test_case_number": "test_case_number"
+    # - 不需要出现在输出的字段：不写在这里就行
+    # ============================================================
+    FIELD_MAPPING = {
+        "source_file_path": "file_path",
+        "test_case_number": "test_case_number",
+        "test_case_name": "test_case_name",
+        "repo_path": "repo_path",
+        "module": "module",
+        "priority": "priority",
+        "expected_result": "expected_result",
+    }
+
     def enrich(self, raw: RawSourceFile, structured: List[StructuredEntity]) -> List[TestCaseCorpusItem]:
         items = []
         for entity in structured:
@@ -16,26 +33,25 @@ class TestCaseEnricher(Enricher):
             if not isinstance(doc_structure, TestCaseDocStructure):
                 continue
 
-            pre_conditions = self._match_steps_with_code(
-                doc_structure.pre_conditions,
-                entity.method_implementations.get("preCondition", ""),
-            )
-            test_steps = self._match_steps_with_code(
-                doc_structure.test_steps,
-                entity.method_implementations.get("testSteps", ""),
-            )
-            post_conditions = self._match_steps_with_code(
-                doc_structure.post_conditions,
-                entity.method_implementations.get("postCondition", ""),
-            )
+            # 合并所有方法的步骤为统一的 code_pair_list
+            all_step_descriptions = doc_structure.step_descriptions
+            all_method_source = ""
+            for method_name in ["preCondition", "testSteps", "postCondition"]:
+                source = entity.method_implementations.get(method_name, "")
+                if source:
+                    all_method_source += source + "\n"
+
+            code_pair_list = self._match_steps_with_code(all_step_descriptions, all_method_source)
+
+            # 按 FIELD_MAPPING 从输入 JSON 提取字段
+            mapped_fields = {}
+            for input_key, output_key in self.FIELD_MAPPING.items():
+                if input_key in raw.metadata:
+                    mapped_fields[output_key] = raw.metadata[input_key]
 
             items.append(TestCaseCorpusItem(
-                metadata=raw.metadata,
-                test_case_number=doc_structure.test_case_number,
-                test_case_name=doc_structure.test_case_name,
-                pre_conditions=pre_conditions,
-                test_steps=test_steps,
-                post_conditions=post_conditions,
+                code_pair_list=code_pair_list,
+                **mapped_fields,
             ))
         return items
 

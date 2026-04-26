@@ -1,5 +1,5 @@
 from abc import ABC
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from typing import List, Optional, Dict, Any
 
 
@@ -17,12 +17,27 @@ class StepDetail:
 
 @dataclass
 class TestCaseCorpusItem(CorpusItem):
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    # ============================================================
+    # [字段映射] 输出 JSON 的顶层字段在这里定义
+    # 字段确定后：
+    #   - 新增字段：在下面加一行声明
+    #   - 删除字段：删掉对应行
+    #   - 改字段名：改左边的 Python 属性名
+    # 同时配合 enrichers/test_case_enricher.py 的 FIELD_MAPPING
+    # ============================================================
+    file_path: str = ""
     test_case_number: str = ""
     test_case_name: str = ""
-    pre_conditions: List[StepDetail] = field(default_factory=list)
-    test_steps: List[StepDetail] = field(default_factory=list)
-    post_conditions: List[StepDetail] = field(default_factory=list)
+    code_pair_list: List[StepDetail] = field(default_factory=list)
+    # 以下为透传字段，按需增删
+    repo_path: str = ""
+    module: str = ""
+    priority: str = ""
+    expected_result: str = ""
+
+    def to_dict(self) -> Dict[str, Any]:
+        d = asdict(self)
+        return d
 
 
 @dataclass

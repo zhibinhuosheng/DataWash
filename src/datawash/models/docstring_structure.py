@@ -12,9 +12,7 @@ class DocstringStructure(ABC):
 class TestCaseDocStructure(DocstringStructure):
     test_case_number: str = ""
     test_case_name: str = ""
-    pre_conditions: List[str] = field(default_factory=list)
-    test_steps: List[str] = field(default_factory=list)
-    post_conditions: List[str] = field(default_factory=list)
+    step_descriptions: List[str] = field(default_factory=list)
 
 
 @dataclass

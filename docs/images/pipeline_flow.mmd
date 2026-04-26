@@ -1,0 +1,32 @@
+flowchart TD
+    subgraph Input["输入"]
+        JSON["📋 输入 JSON<br/>（含源文件路径 + 元数据）"]
+        PY["📄 Python 源文件"]
+    end
+
+    subgraph Pipeline["清洗管道"]
+        direction TB
+        READ["① Read<br/>Reader<br/>─────────────<br/>读取 JSON 元数据<br/>加载 .py 源文件"]
+        PARSE["② Parse<br/>ASTParseStage + SourceParser<br/>─────────────<br/>AST 解析源码<br/>提取结构化实体"]
+        EXTRACT["③ Extract<br/>DocstringExtractStage + DocstringParser<br/>─────────────<br/>解析 docstring<br/>提取描述信息"]
+        ENRICH["④ Enrich<br/>EnrichStage + Enricher<br/>─────────────<br/>映射字段 + 关联描述与代码"]
+        WRITE["⑤ Write<br/>Writer<br/>─────────────<br/>序列化输出 JSON"]
+    end
+
+    subgraph Output["输出"]
+        OUT["📋 输出 JSON"]
+    end
+
+    JSON --> READ
+    PY --> READ
+    READ --> PARSE
+    PARSE --> EXTRACT
+    EXTRACT --> ENRICH
+    ENRICH --> WRITE
+    WRITE --> OUT
+
+    style READ fill:#4A90D9,color:#fff
+    style PARSE fill:#4A90D9,color:#fff
+    style EXTRACT fill:#4A90D9,color:#fff
+    style ENRICH fill:#D94A4A,color:#fff
+    style WRITE fill:#4A90D9,color:#fff
