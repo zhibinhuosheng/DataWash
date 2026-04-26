@@ -14,7 +14,7 @@ class TestCaseJsonReader(ReadStageBase):
             json_files = list_json_files(input_path) if os.path.isdir(input_path) else [input_path]
             for json_file in json_files:
                 metadata = json.loads(read_file(json_file))
-                source_file = os.path.join(config.source_root, metadata["source_file_path"])
+                source_file = metadata["source_file_path"]
                 source_code = read_file(source_file)
                 raw_files.append(RawSourceFile(
                     file_path=metadata["source_file_path"],

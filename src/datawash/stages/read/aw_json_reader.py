@@ -14,7 +14,7 @@ class AWJsonReader(ReadStageBase):
             input_data = json.loads(read_file(input_path))
             file_paths = input_data.get("file_paths", [])
             for file_path in file_paths:
-                source_file = os.path.join(config.source_root, file_path)
+                source_file = file_path
                 source_code = read_file(source_file)
                 raw_files.append(RawSourceFile(
                     file_path=file_path,
