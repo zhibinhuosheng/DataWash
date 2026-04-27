@@ -1,0 +1,49 @@
+[
+  {
+    "file_name": "",
+    "language": "",
+    "test_framework": "",
+    "dependencies": "",
+    "class_name": "",
+    "path": "",
+    "test_suite": "",
+    "dataset_type": "",
+    "product_info": {
+      "product_line_name": "",
+      "pdu_name": ""
+    },
+    "git_info": {
+      "git_url": "",
+      "branch": ""
+    },
+    "tc_info": {
+      "test_case_name": "",
+      "test_step": "",
+      "test_environment_type": "",
+      "test_feature": "",
+      "test_case_number": "",
+      "test_activity": "",
+      "test_case_type": "",
+      "pre_condition": "",
+      "expected_result": ""
+    },
+    "case_id": "",
+    "code_pair_list": [
+      {
+        "prompt": "",
+        "code": "",
+        "prompt_id": "",
+        "prompt_pos": "",
+        "code_pos": "",
+        "step_dependencies": "",
+        "step_setup": {
+          "step_setup_code": "",
+          "step_instance_var": "",
+          "step_method_var": ""
+        },
+        "step_teardown": "",
+        "step_index": ""
+      }
+    ]
+  }
+]
