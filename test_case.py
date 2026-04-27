@@ -24,7 +24,24 @@ class Test_XXX:
     def test_Procedure(self):
         tc.logInfo("测试步骤：进行XXX")
         # 进行XXX的具体实现代码
+        tmp = 123
+        if tmp > 100:
+            tc.logInfo("测试步骤：进行XXX")
+            # 进入True的代码
+        else:
+            tc.logInfo("测试步骤：进行XXX")
+            # 进入False的代码
         print("测试步骤：进行XXX")
+        tmp = 123
+        if tmp > 100:
+            tc.logInfo("测试步骤：进行XXX")
+            # 进入True的代码
+        elif tmp == 100:
+            tc.logInfo("测试步骤：进行XXX")
+            # 进入False的代码
+        else:
+            tc.logInfo("测试步骤：进行XXX")
+            # 进入else的代码
         print("测试步骤：进行XXX")
         tc.logInfo("查询XXX")
         # 查询XXX的具体实现代码
