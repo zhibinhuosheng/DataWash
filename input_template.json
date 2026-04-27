@@ -1,0 +1,49 @@
+[
+    {
+        "local_code_path": "",
+        "file_full_path": "",
+        "file_path": "",
+        "tmss_original": {
+            "dataset_type": "",
+            "number": "",
+            "TestStep": "",
+            "name": "",
+            "envtype": "",
+            "rank": "",
+            "TestType": "",
+            "testcaseProject": "",
+            "testActivity": "",
+            "testFeature": ""
+        },
+        "case_info": {
+            "test_case_name": "",
+            "test_step": "",
+            "test_environment_type": "",
+            "test_feature": "",
+            "test_case_number": "",
+            "test_activity": "",
+            "pre_condition": "",
+            "test_case_type": "",
+            "expected_result": ""
+        },
+        "file_name": "",
+        "product_info": {
+            "version_uri": "",
+            "product_line_name": "",
+            "pdu_name": ""
+        },
+        "script_path": "",
+        "real_uri": "",
+        "creation_date": "",
+        "auto_type": "",
+        "is_language_material": "",
+        "test_case_number": "",
+        "case_full_uri": "",
+        "tmssTenant": "",
+        "git_info": {
+            "git_url": "",
+            "branch": ""
+        },
+        "test_framework": ""
+    }
+]
