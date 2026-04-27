@@ -17,7 +17,8 @@ class Test_XXX:
     """
 
     def Precondition(self):
-        tc.logInfo("前置条件：XXX设置为XXXX")
+        time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        tc.logInfo(f"前置条件：XXX{time}设置为XXXX")
         # XXX设置为XXXX的具体实现代码
         print("前置条件：XXX设置为XXXX")
 

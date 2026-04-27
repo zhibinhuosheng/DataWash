@@ -110,11 +110,21 @@ class TestCaseCorpusParseStage(PipelineStage):
                 and isinstance(node.func.value, ast.Name)
                 and node.func.value.id == "tc"
                 and node.args
-                and isinstance(node.args[0], ast.Constant))
+                and isinstance(node.args[0], (ast.Constant, ast.JoinedStr)))
 
     def _get_log_info_message(self, stmt: ast.stmt) -> str:
         call = stmt.value if isinstance(stmt, ast.Expr) else stmt
-        return call.args[0].value
+        arg = call.args[0]
+        if isinstance(arg, ast.Constant):
+            return arg.value
+        # ast.JoinedStr (f-string): 拼接各部分，变量用 {name} 占位
+        parts = []
+        for v in arg.values:
+            if isinstance(v, ast.Constant):
+                parts.append(str(v.value))
+            elif isinstance(v, ast.FormattedValue):
+                parts.append("{" + ast.unparse(v.value) + "}")
+        return "".join(parts)
 
     def _contains_log_info(self, node: ast.AST) -> bool:
         for child in ast.walk(node):
