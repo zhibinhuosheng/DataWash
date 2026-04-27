@@ -1,0 +1,47 @@
+{
+    "local_code_path": "D:/CODE/DataWash/",
+    "file_full_path": "test_case.py",
+    "file_path": "test_case.py",
+    "tmss_original": {
+        "dataset_type": "",
+        "number": "XXX",
+        "TestStep": "1.进行XXX 2.进行XXXX",
+        "name": "",
+        "envtype": "",
+        "rank": "",
+        "TestType": "",
+        "testcaseProject": "",
+        "testActivity": "",
+        "testFeature": ""
+    },
+    "case_info": {
+        "test_case_name": "",
+        "test_step": "1.进行XXX 2.进行XXXX",
+        "test_environment_type": "",
+        "test_feature": "",
+        "test_case_number": "XXX",
+        "test_activity": "",
+        "pre_condition": "1、XXX设置为XXXX",
+        "test_case_type": "",
+        "expected_result": "1.进行XXXXX 2.执行XXXXXXXX"
+    },
+    "file_name": "test_case.py",
+    "product_info": {
+        "version_uri": "1.0.0",
+        "product_line_name": "test_product_line",
+        "pdu_name": "test_pdu_name"
+    },
+    "script_path": "",
+    "real_uri": "",
+    "creation_date": "",
+    "auto_type": "",
+    "is_language_material": "",
+    "test_case_number": "XXX",
+    "case_full_uri": "",
+    "tmssTenant": "",
+    "git_info": {
+        "git_url": "",
+        "branch": ""
+    },
+    "test_framework": ""
+}

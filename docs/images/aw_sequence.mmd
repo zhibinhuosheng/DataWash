@@ -1,0 +1,38 @@
+sequenceDiagram
+    participant User
+    participant Entry as aw_wash.py
+    participant Builder as PipelineBuilder
+    participant Pipeline as Pipeline
+    participant Reader as AWJsonReader
+    participant Parser as ASTParseStage + AWParser
+    participant Extractor as DocstringExtractStage + AWDocstringParser
+    participant Enrich as AWEnrichStage
+    participant Writer as AWAggregateWriter
+
+    User->>Entry: --input ./aw_input.json --output ./output
+    Entry->>Builder: build_aw_pipeline(config)
+    Builder-->>Pipeline: 构建完成的管道
+    Entry->>Pipeline: run(config)
+
+    Pipeline->>Reader: process(config)
+    Note right of Reader: 读取 JSON 中的文件路径列表, 加载所有源文件
+    Reader-->>Pipeline: List[RawSourceFile]
+
+    Pipeline->>Parser: process(raw_files)
+    Note right of Parser: AST 定位所有 aw_* 函数, 提取函数名和源码
+    Parser-->>Pipeline: List[Tuple]
+
+    Pipeline->>Extractor: process(parsed_data)
+    Note right of Extractor: 解析 docstring 提取函数功能描述
+    Extractor-->>Pipeline: List[Tuple]
+
+    Pipeline->>Enrich: process(structured_data)
+    Note right of Enrich: 组装 AWCorpusItem
+    Enrich-->>Pipeline: List[AWCorpusItem]
+
+    Pipeline->>Writer: process(corpus_items)
+    Note right of Writer: 聚合输出单个 JSON
+    Writer-->>Pipeline: 输出文件路径
+
+    Pipeline-->>Entry: 完成
+    Entry-->>User: 输出文件路径

@@ -1,29 +1,10 @@
 flowchart TD
-    subgraph Input["输入"]
-        JSON["📋 输入 JSON<br/>（含源文件路径 + 元数据）"]
-        PY["📄 Python 源文件"]
-    end
-
-    subgraph Pipeline["清洗管道"]
-        direction TB
-        READ["① Read<br/>Reader<br/>─────────────<br/>读取 JSON 元数据<br/>加载 .py 源文件"]
-        PARSE["② Parse<br/>ASTParseStage + SourceParser<br/>─────────────<br/>AST 解析源码<br/>提取结构化实体"]
-        EXTRACT["③ Extract<br/>DocstringExtractStage + DocstringParser<br/>─────────────<br/>解析 docstring<br/>提取描述信息"]
-        ENRICH["④ Enrich<br/>EnrichStage + Enricher<br/>─────────────<br/>映射字段 + 关联描述与代码"]
-        WRITE["⑤ Write<br/>Writer<br/>─────────────<br/>序列化输出 JSON"]
-    end
-
-    subgraph Output["输出"]
-        OUT["📋 输出 JSON"]
-    end
-
-    JSON --> READ
-    PY --> READ
-    READ --> PARSE
-    PARSE --> EXTRACT
-    EXTRACT --> ENRICH
-    ENRICH --> WRITE
-    WRITE --> OUT
+    INPUT[/"输入 JSON + Python 源文件"/] --> READ["① Read\nTC: TestCaseJsonReader / AW: AWJsonReader\n─────────────\n读取输入"]
+    READ --> PARSE["② Parse\nTC: TestCaseClassParseStage / AW: ASTParseStage + AWParser\n─────────────\n定位类或函数"]
+    PARSE --> EXTRACT["③ Extract\nTC: TestCaseCorpusParseStage / AW: DocstringExtractStage + AWDocstringParser\n─────────────\n提取 prompt-code 对 / 提取 docstring"]
+    EXTRACT --> ENRICH["④ Enrich\nTC: TestCaseEnrichStage / AW: AWEnrichStage\n─────────────\n字段映射 / 组装 CorpusItem"]
+    ENRICH --> WRITE["⑤ Write\nTC: TestCaseFileWriter / AW: AWAggregateWriter\n─────────────\nTC: 每用例一个 JSON / AW: 聚合输出"]
+    WRITE --> OUTPUT[/"输出 JSON"/]
 
     style READ fill:#4A90D9,color:#fff
     style PARSE fill:#4A90D9,color:#fff

@@ -1,0 +1,79 @@
+classDiagram
+    class PipelineStage {
+        <<abstract>>
+        +process(data) Any
+    }
+
+    class ReadStageBase {
+        <<abstract>>
+        +process(data) List
+        #_read_sources(data)* List
+    }
+
+    class TestCaseJsonReader {
+        #_read_sources(data) List~Dict~
+    }
+
+    class AWJsonReader {
+        #_read_sources(data) List~RawSourceFile~
+    }
+
+    class TestCaseClassParseStage {
+        +process(data) List~Tuple~
+        -_find_class_by_number(tree, number) ClassDef
+    }
+
+    class TestCaseCorpusParseStage {
+        +process(data) List~Tuple~
+        -_extract_pairs_from_class(node, lines) List~CodePair~
+        -_extract_from_body(body, lines) List
+        -_extract_from_control_flow(node, lines) List
+    }
+
+    class ASTParseStage {
+        -parser: SourceParser
+        +process(data) List~Tuple~
+    }
+
+    class DocstringExtractStage {
+        -docstring_parser: DocstringParser
+        +process(data) List~Tuple~
+    }
+
+    class EnrichStageBase {
+        -enricher: Enricher
+        +process(data) List~CorpusItem~
+    }
+
+    class TestCaseEnrichStage {
+    }
+
+    class AWEnrichStage {
+    }
+
+    class WriteStageBase {
+        <<abstract>>
+        +process(items) Any
+    }
+
+    class TestCaseFileWriter {
+        +process(items) str
+    }
+
+    class AWAggregateWriter {
+    }
+
+    PipelineStage <|-- ReadStageBase
+    PipelineStage <|-- TestCaseClassParseStage
+    PipelineStage <|-- TestCaseCorpusParseStage
+    PipelineStage <|-- ASTParseStage
+    PipelineStage <|-- DocstringExtractStage
+    PipelineStage <|-- EnrichStageBase
+    PipelineStage <|-- WriteStageBase
+
+    ReadStageBase <|-- TestCaseJsonReader
+    ReadStageBase <|-- AWJsonReader
+    EnrichStageBase <|-- TestCaseEnrichStage
+    EnrichStageBase <|-- AWEnrichStage
+    WriteStageBase <|-- TestCaseFileWriter
+    WriteStageBase <|-- AWAggregateWriter

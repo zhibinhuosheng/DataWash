@@ -1,0 +1,38 @@
+sequenceDiagram
+    participant User
+    participant Entry as testcase_wash.py
+    participant Builder as PipelineBuilder
+    participant Pipeline as Pipeline
+    participant Reader as TestCaseJsonReader
+    participant ClassParse as TestCaseClassParseStage
+    participant CorpusParse as TestCaseCorpusParseStage
+    participant Enrich as TestCaseEnrichStage
+    participant Writer as TestCaseFileWriter
+
+    User->>Entry: --input ./input --output ./output
+    Entry->>Builder: build_test_case_pipeline(config)
+    Builder-->>Pipeline: 构建完成的管道
+    Entry->>Pipeline: run(config)
+
+    Pipeline->>Reader: process(config)
+    Note right of Reader: 扫描文件夹中所有 JSON, 仅提取 metadata
+    Reader-->>Pipeline: List[Dict]
+
+    Pipeline->>ClassParse: process(metadata_list)
+    Note right of ClassParse: 按 file_full_path 读取源文件, AST 定位含 test_case_number 的 ClassDef
+    ClassParse-->>Pipeline: List[(metadata, class_name, class_node, source_lines)]
+
+    Pipeline->>CorpusParse: process(class_data)
+    Note right of CorpusParse: 语句层级遍历方法体, tc.logInfo 作 prompt 分隔符, 控制流块递归提取
+    CorpusParse-->>Pipeline: List[(metadata, class_name, List[CodePair])]
+
+    Pipeline->>Enrich: process(corpus_data)
+    Note right of Enrich: FIELD_MAPPING 映射输入到输出字段, 填充 TestCaseCorpusItem
+    Enrich-->>Pipeline: List[TestCaseCorpusItem]
+
+    Pipeline->>Writer: process(corpus_items)
+    Note right of Writer: 以 test_case_number 命名, 每用例一个 JSON 文件
+    Writer-->>Pipeline: 输出目录路径
+
+    Pipeline-->>Entry: 完成
+    Entry-->>User: 输出目录路径

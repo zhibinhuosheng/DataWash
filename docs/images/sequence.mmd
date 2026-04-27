@@ -1,44 +1,38 @@
 sequenceDiagram
+    participant User
     participant Entry as 入口脚本
     participant Builder as PipelineBuilder
-    participant P as Pipeline
-    participant R as Reader
-    participant PS as ASTParseStage
-    participant SP as SourceParser
-    participant ES as DocstringExtractStage
-    participant DP as DocstringParser
-    participant EN as EnrichStage
-    participant ER as Enricher
-    participant W as Writer
+    participant Pipeline as Pipeline
+    participant Read as Read
+    participant Parse as Parse
+    participant Extract as Extract
+    participant Enrich as Enrich
+    participant Write as Write
 
-    Entry->>Builder: build_xxx_pipeline(config)
-    Builder-->>P: 管道实例（注入对应策略）
-    Entry->>P: run(config)
+    User->>Entry: --input ... --output ...
+    Entry->>Builder: build_pipeline(config)
+    Builder-->>Pipeline: 构建完成的管道
+    Entry->>Pipeline: run(config)
 
-    P->>R: process(config)
-    Note right of R: 读取输入 JSON<br/>加载 .py 源文件
-    R-->>P: List[RawSourceFile]
+    Pipeline->>Read: process(config)
+    Note right of Read: TC: TestCaseJsonReader 扫描 JSON 文件夹, 仅提取 metadata<br/>AW: AWJsonReader 读取文件路径列表, 加载源文件
+    Read-->>Pipeline: TC: List[Dict] / AW: List[RawSourceFile]
 
-    P->>PS: process(raw_files)
-    PS->>SP: parse(raw)
-    Note right of SP: ast.parse() 解析源码<br/>TC: 定位 class Test_*<br/>AW: 定位 def aw_*
-    SP-->>PS: List[ParsedEntity]
-    PS-->>P: List[(RawSourceFile, ParsedEntity)]
+    Pipeline->>Parse: process(read_data)
+    Note right of Parse: TC: TestCaseClassParseStage 读取源文件, AST 定位 ClassDef<br/>AW: ASTParseStage + AWParser 解析 aw_* 函数
+    Parse-->>Pipeline: TC: List[(metadata, class_name, class_node, source_lines)]<br/>AW: List[Tuple]
 
-    P->>ES: process(parsed_data)
-    ES->>DP: parse_docstring(docstring)
-    Note right of DP: TC: 提取步骤描述列表<br/>AW: 提取函数功能描述
-    DP-->>ES: DocstringStructure
-    ES-->>P: List[(RawSourceFile, StructuredEntity)]
+    Pipeline->>Extract: process(parsed_data)
+    Note right of Extract: TC: TestCaseCorpusParseStage 语句层级遍历, tc.logInfo 作 prompt 分隔符, 控制流块递归提取<br/>AW: DocstringExtractStage + AWDocstringParser 解析 docstring 提取功能描述
+    Extract-->>Pipeline: TC: List[(metadata, class_name, List[CodePair])]<br/>AW: List[Tuple]
 
-    P->>EN: process(structured_data)
-    EN->>ER: enrich(raw, structured)
-    Note right of ER: TC: FIELD_MAPPING + code_pair_list<br/>AW: function_name + description + code
-    ER-->>EN: List[CorpusItem]
-    EN-->>P: List[CorpusItem]
+    Pipeline->>Enrich: process(extracted_data)
+    Note right of Enrich: TC: TestCaseEnrichStage FIELD_MAPPING 映射输入到输出字段, 填充 TestCaseCorpusItem<br/>AW: AWEnrichStage 组装 AWCorpusItem
+    Enrich-->>Pipeline: TC: List[TestCaseCorpusItem] / AW: List[AWCorpusItem]
 
-    P->>W: process(corpus_items)
-    Note right of W: TC: 每个用例一个 JSON<br/>AW: 聚合输出单个 JSON
-    W-->>P: 完成
+    Pipeline->>Write: process(corpus_items)
+    Note right of Write: TC: TestCaseFileWriter 以 test_case_number 命名, 每用例一个 JSON<br/>AW: AWAggregateWriter 聚合输出单个 JSON
+    Write-->>Pipeline: 输出目录路径
 
-    P-->>Entry: 清洗完成
+    Pipeline-->>Entry: 完成
+    Entry-->>User: 输出路径

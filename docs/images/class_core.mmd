@@ -1,0 +1,26 @@
+classDiagram
+    class PipelineStage {
+        <<abstract>>
+        +process(data) Any
+    }
+
+    class Pipeline {
+        -stages: List~PipelineStage~
+        +add_stage(stage) Pipeline
+        +run(initial_data) Any
+    }
+
+    class PipelineConfig {
+        +input_path: str
+        +output_dir: str
+        +options: Dict
+    }
+
+    class PipelineBuilder {
+        +build_test_case_pipeline(config) Pipeline$
+        +build_aw_pipeline(config) Pipeline$
+    }
+
+    Pipeline "1" o-- "0..*" PipelineStage : stages
+    PipelineBuilder ..> Pipeline : creates
+    PipelineBuilder ..> PipelineConfig : uses

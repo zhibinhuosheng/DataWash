@@ -1,0 +1,49 @@
+classDiagram
+    class CorpusItem {
+        <<abstract>>
+    }
+
+    class CodePair {
+        +prompt: str
+        +code: str
+        +prompt_id: str
+        +prompt_pos: str
+        +code_pos: str
+        +step_dependencies: str
+        +step_setup: StepSetup
+        +step_teardown: str
+        +step_index: str
+    }
+
+    class StepSetup {
+        +step_setup_code: str
+        +step_instance_var: str
+        +step_method_var: str
+    }
+
+    class TestCaseCorpusItem {
+        +file_name: str
+        +language: str
+        +test_framework: str
+        +dependencies: str
+        +class_name: str
+        +path: str
+        +test_suite: str
+        +dataset_type: str
+        +product_info: Dict
+        +git_info: Dict
+        +tc_info: Dict
+        +case_id: str
+        +code_pair_list: List~CodePair~
+    }
+
+    class AWCorpusItem {
+        +function_name: str
+        +description: str
+        +implementation_code: str
+    }
+
+    CorpusItem <|-- TestCaseCorpusItem
+    CorpusItem <|-- AWCorpusItem
+    TestCaseCorpusItem *-- "0..*" CodePair
+    CodePair *-- StepSetup
