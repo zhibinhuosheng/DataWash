@@ -1,36 +1,18 @@
-import os
+import argparse
 
 from datawash.config.pipeline_config import PipelineConfig
 from datawash.pipeline.pipeline_builder import PipelineBuilder
 
 
-def main():
-    input_path = os.environ.get("DATAWASH_INPUT", "")
-    output_dir = os.environ.get("DATAWASH_OUTPUT", "")
-
-    if not all([input_path, output_dir]):
-        print("用法: python -m datawash.testcase_wash --input <路径> --output <目录>")
-        return
-
-    config = PipelineConfig(
-        input_paths=[input_path] if os.path.isfile(input_path) else [input_path],
-        output_dir=output_dir,
-    )
-
-    pipeline = PipelineBuilder.build_test_case_pipeline(config)
-    pipeline.run(config)
-    print(f"测试用例清洗完成，输出目录: {output_dir}")
-
-
 if __name__ == "__main__":
-    import argparse
     parser = argparse.ArgumentParser(description="测试用例语料清洗")
-    parser.add_argument("--input", required=True, help="输入路径")
-    parser.add_argument("--output", required=True, help="输出目录")
+    parser.add_argument("--input", required=False, help="输入路径")
+    parser.add_argument("--output", required=False, help="输出目录")
     args = parser.parse_args()
-
+    args.input = "D:/CODE/DataWash/input"
+    args.output = "D:/CODE/DataWash/output"
     config = PipelineConfig(
-        input_paths=[args.input] if os.path.isfile(args.input) else [args.input],
+        input_path=args.input,
         output_dir=args.output,
     )
 

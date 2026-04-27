@@ -4,6 +4,6 @@ from typing import List, Dict, Any
 
 @dataclass
 class PipelineConfig:
-    input_paths: List[str] = field(default_factory=list)
+    input_path: str = ""
     output_dir: str = ""
     options: Dict[str, Any] = field(default_factory=dict)

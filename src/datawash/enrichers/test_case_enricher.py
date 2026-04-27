@@ -1,10 +1,5 @@
-import ast
-import re
-from typing import List, Tuple, Optional
-from ..models.raw_source import RawSourceFile
-from ..models.parsed_entity import StructuredEntity
-from ..models.corpus_item import TestCaseCorpusItem, StepDetail
-from ..models.docstring_structure import TestCaseDocStructure
+from typing import List, Any
+from ..models.corpus_item import TestCaseCorpusItem
 from .enricher import Enricher
 
 
@@ -17,89 +12,68 @@ class TestCaseEnricher(Enricher):
     # - 不需要出现在输出的字段：不写在这里就行
     # ============================================================
     FIELD_MAPPING = {
-        "source_file_path": "file_path",
-        "test_case_number": "test_case_number",
-        "test_case_name": "test_case_name",
-        "repo_path": "repo_path",
-        "module": "module",
-        "priority": "priority",
-        "expected_result": "expected_result",
+        # 顶层字段
+        "file_name": "file_name",
+        "test_framework": "test_framework",
+        "dataset_type": "dataset_type",
+        "case_id": "case_id",
+        "path": "path",
+        # 嵌套对象 → 顶层 dict
+        "tmss_original.dataset_type": "dataset_type",
+        "product_info": "product_info",
+        "git_info": "git_info",
+        # tc_info 嵌套字段映射
+        "case_info.test_case_name": "tc_info.test_case_name",
+        "case_info.test_step": "tc_info.test_step",
+        "case_info.test_environment_type": "tc_info.test_environment_type",
+        "case_info.test_feature": "tc_info.test_feature",
+        "case_info.test_case_number": "tc_info.test_case_number",
+        "case_info.test_activity": "tc_info.test_activity",
+        "case_info.pre_condition": "tc_info.pre_condition",
+        "case_info.test_case_type": "tc_info.test_case_type",
+        "case_info.expected_result": "tc_info.expected_result",
     }
 
-    def enrich(self, raw: RawSourceFile, structured: List[StructuredEntity]) -> List[TestCaseCorpusItem]:
-        items = []
-        for entity in structured:
-            doc_structure = entity.doc_structure
-            if not isinstance(doc_structure, TestCaseDocStructure):
+    def enrich(self, metadata: dict, parsed_data: Any) -> List[TestCaseCorpusItem]:
+        class_name, code_pairs = parsed_data
+
+        # 按 FIELD_MAPPING 提取字段
+        mapped = self._map_fields(metadata)
+
+        # 确保 class_name 来自 AST 解析
+        mapped["class_name"] = class_name
+
+        # 填入 code_pair_list
+        mapped["code_pair_list"] = code_pairs
+
+        return [TestCaseCorpusItem(**mapped)]
+
+    def _map_fields(self, metadata: dict) -> dict:
+        """按 FIELD_MAPPING 从输入 JSON 中提取并映射字段"""
+        result = {}
+        for input_key, output_key in self.FIELD_MAPPING.items():
+            value = self._get_nested(metadata, input_key)
+            if value is None:
                 continue
+            self._set_nested(result, output_key, value)
+        return result
 
-            # 合并所有方法的步骤为统一的 code_pair_list
-            all_step_descriptions = doc_structure.step_descriptions
-            all_method_source = ""
-            for method_name in ["preCondition", "testSteps", "postCondition"]:
-                source = entity.method_implementations.get(method_name, "")
-                if source:
-                    all_method_source += source + "\n"
+    def _get_nested(self, d: dict, key: str) -> Any:
+        """获取嵌套字典值，如 'case_info.test_case_name'"""
+        keys = key.split(".")
+        current = d
+        for k in keys:
+            if not isinstance(current, dict) or k not in current:
+                return None
+            current = current[k]
+        return current
 
-            code_pair_list = self._match_steps_with_code(all_step_descriptions, all_method_source)
-
-            # 按 FIELD_MAPPING 从输入 JSON 提取字段
-            mapped_fields = {}
-            for input_key, output_key in self.FIELD_MAPPING.items():
-                if input_key in raw.metadata:
-                    mapped_fields[output_key] = raw.metadata[input_key]
-
-            items.append(TestCaseCorpusItem(
-                code_pair_list=code_pair_list,
-                **mapped_fields,
-            ))
-        return items
-
-    def _match_steps_with_code(self, step_descriptions: List[str], method_source: str) -> List[StepDetail]:
-        if not step_descriptions or not method_source:
-            return [StepDetail(description=d, implementation_code="") for d in step_descriptions]
-
-        log_info_blocks = self._split_by_log_info(method_source)
-
-        results = []
-        for i, description in enumerate(step_descriptions):
-            log_info = None
-            implementation_code = ""
-            if i < len(log_info_blocks):
-                log_info = log_info_blocks[i]["log_message"]
-                implementation_code = log_info_blocks[i]["code_block"].strip()
-            results.append(StepDetail(
-                description=description,
-                log_info=log_info,
-                implementation_code=implementation_code,
-            ))
-        return results
-
-    def _split_by_log_info(self, method_source: str) -> List[dict]:
-        lines = method_source.split("\n")
-        blocks = []
-        current_log_message = None
-        current_code_lines = []
-
-        for line in lines:
-            match = re.match(r'\s*tc\.logInfo\("(.+?)"\)', line)
-            if match:
-                if current_log_message is not None:
-                    blocks.append({
-                        "log_message": current_log_message,
-                        "code_block": "\n".join(current_code_lines),
-                    })
-                current_log_message = match.group(1)
-                current_code_lines = []
-            elif current_log_message is not None:
-                stripped = line.strip()
-                if stripped and not stripped.startswith("def ") and stripped != "pass":
-                    current_code_lines.append(stripped)
-
-        if current_log_message is not None:
-            blocks.append({
-                "log_message": current_log_message,
-                "code_block": "\n".join(current_code_lines),
-            })
-
-        return blocks
+    def _set_nested(self, d: dict, key: str, value: Any):
+        """设置嵌套字典值，如 'tc_info.test_case_name'"""
+        keys = key.split(".")
+        current = d
+        for k in keys[:-1]:
+            if k not in current:
+                current[k] = {}
+            current = current[k]
+        current[keys[-1]] = value

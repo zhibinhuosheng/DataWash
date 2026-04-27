@@ -22,7 +22,8 @@ class TestCaseFileWriter(WriteStageBase):
         os.makedirs(output_dir, exist_ok=True)
 
         for item in items:
-            file_path = os.path.join(output_dir, f"{item.test_case_number}.json")
+            test_case_number = item.tc_info.get("test_case_number", "unknown")
+            file_path = os.path.join(output_dir, f"{test_case_number}.json")
             with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(asdict(item), f, ensure_ascii=False, indent=4)
 

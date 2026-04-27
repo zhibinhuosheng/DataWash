@@ -6,17 +6,15 @@ class PipelineBuilder:
     @staticmethod
     def build_test_case_pipeline(config: PipelineConfig) -> Pipeline:
         from ..stages.read.test_case_json_reader import TestCaseJsonReader
-        from ..stages.parse.ast_parse_stage import ASTParseStage
-        from ..parsers.test_case.test_case_parser import TestCaseParser
-        from ..stages.extract.docstring_extract_stage import DocstringExtractStage
-        from ..parsers.test_case.test_case_docstring_parser import TestCaseDocstringParser
+        from ..stages.parse.test_case_class_parse_stage import TestCaseClassParseStage
+        from ..stages.parse.test_case_corpus_parse_stage import TestCaseCorpusParseStage
         from ..stages.enrich.test_case_enrich_stage import TestCaseEnrichStage
         from ..stages.write.test_case_file_writer import TestCaseFileWriter
 
         pipeline = Pipeline()
         pipeline.add_stage(TestCaseJsonReader()) \
-                .add_stage(ASTParseStage(parser=TestCaseParser())) \
-                .add_stage(DocstringExtractStage(docstring_parser=TestCaseDocstringParser())) \
+                .add_stage(TestCaseClassParseStage()) \
+                .add_stage(TestCaseCorpusParseStage()) \
                 .add_stage(TestCaseEnrichStage()) \
                 .add_stage(TestCaseFileWriter(config=config))
         return pipeline

@@ -1,36 +1,17 @@
-import os
+import argparse
 
 from datawash.config.pipeline_config import PipelineConfig
 from datawash.pipeline.pipeline_builder import PipelineBuilder
 
 
-def main():
-    input_path = os.environ.get("DATAWASH_INPUT", "")
-    output_dir = os.environ.get("DATAWASH_OUTPUT", "")
-
-    if not all([input_path, output_dir]):
-        print("用法: python -m datawash.aw_wash --input <路径> --output <目录>")
-        return
-
-    config = PipelineConfig(
-        input_paths=[input_path],
-        output_dir=output_dir,
-    )
-
-    pipeline = PipelineBuilder.build_aw_pipeline(config)
-    pipeline.run(config)
-    print(f"AW 语料清洗完成，输出目录: {output_dir}")
-
-
 if __name__ == "__main__":
-    import argparse
     parser = argparse.ArgumentParser(description="AW 语料清洗")
     parser.add_argument("--input", required=True, help="输入 JSON 文件路径")
     parser.add_argument("--output", required=True, help="输出目录")
     args = parser.parse_args()
 
     config = PipelineConfig(
-        input_paths=[args.input],
+        input_path=args.input,
         output_dir=args.output,
     )
 

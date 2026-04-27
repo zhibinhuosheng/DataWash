@@ -10,7 +10,7 @@ class AWJsonReader(ReadStageBase):
     def _read_sources(self, data: Any) -> List[RawSourceFile]:
         config = data
         raw_files = []
-        for input_path in config.input_paths:
+        for input_path in [config.input_path]:
             input_data = json.loads(read_file(input_path))
             file_paths = input_data.get("file_paths", [])
             for file_path in file_paths:
