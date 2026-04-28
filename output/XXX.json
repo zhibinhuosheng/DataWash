@@ -2,7 +2,7 @@
     "file_name": "test_case.py",
     "language": "",
     "test_framework": "",
-    "dependencies": "",
+    "dependencies": "from datetime import datetime; from log import tc",
     "class_name": "Test_XXX",
     "path": "",
     "test_suite": "",
@@ -31,11 +31,11 @@
     "code_pair_list": [
         {
             "prompt": "前置条件：XXX{time}设置为XXXX",
-            "code": "# XXX设置为XXXX的具体实现代码\nprint(\"前置条件：XXX设置为XXXX\")",
+            "code": "# XXX设置为XXXX的具体实现代码\ntime = datetime.now().strftime(\"%Y-%m-%d %H:%M:%S\")\nprint(\"前置条件：XXX设置为XXXX\",time)",
             "prompt_id": "",
             "prompt_pos": "[21, 21]",
-            "code_pos": "[22, 23]",
-            "step_dependencies": "",
+            "code_pos": "[22, 24]",
+            "step_dependencies": "from datetime import datetime",
             "step_setup": {
                 "step_setup_code": "",
                 "step_instance_var": "",
@@ -48,7 +48,7 @@
             "prompt": "测试步骤：进行XXX",
             "code": "",
             "prompt_id": "",
-            "prompt_pos": "[30, 30]",
+            "prompt_pos": "[31, 31]",
             "code_pos": "",
             "step_dependencies": "",
             "step_setup": {
@@ -63,7 +63,7 @@
             "prompt": "测试步骤：进行XXX",
             "code": "",
             "prompt_id": "",
-            "prompt_pos": "[33, 33]",
+            "prompt_pos": "[34, 34]",
             "code_pos": "",
             "step_dependencies": "",
             "step_setup": {
@@ -78,7 +78,7 @@
             "prompt": "测试步骤：进行XXX",
             "code": "",
             "prompt_id": "",
-            "prompt_pos": "[38, 38]",
+            "prompt_pos": "[39, 39]",
             "code_pos": "",
             "step_dependencies": "",
             "step_setup": {
@@ -93,7 +93,7 @@
             "prompt": "测试步骤：进行XXX",
             "code": "",
             "prompt_id": "",
-            "prompt_pos": "[41, 41]",
+            "prompt_pos": "[42, 42]",
             "code_pos": "",
             "step_dependencies": "",
             "step_setup": {
@@ -108,7 +108,7 @@
             "prompt": "测试步骤：进行XXX",
             "code": "",
             "prompt_id": "",
-            "prompt_pos": "[44, 44]",
+            "prompt_pos": "[45, 45]",
             "code_pos": "",
             "step_dependencies": "",
             "step_setup": {
@@ -123,8 +123,8 @@
             "prompt": "测试步骤：进行XXX",
             "code": "# 进行XXX的具体实现代码\ntmp = 123\nif tmp > 100:\ntc.logInfo(\"测试步骤：进行XXX\")\n# 进入True的代码\nelse:\ntc.logInfo(\"测试步骤：进行XXX\")\n# 进入False的代码\nprint(\"测试步骤：进行XXX\")\ntmp = 123\nif tmp > 100:\ntc.logInfo(\"测试步骤：进行XXX\")\n# 进入True的代码\nelif tmp == 100:\ntc.logInfo(\"测试步骤：进行XXX\")\n# 进入False的代码\nelse:\ntc.logInfo(\"测试步骤：进行XXX\")\n# 进入else的代码\nprint(\"测试步骤：进行XXX\")",
             "prompt_id": "",
-            "prompt_pos": "[26, 26]",
-            "code_pos": "[27, 46]",
+            "prompt_pos": "[27, 27]",
+            "code_pos": "[28, 47]",
             "step_dependencies": "",
             "step_setup": {
                 "step_setup_code": "",
@@ -138,8 +138,8 @@
             "prompt": "查询XXX",
             "code": "# 查询XXX的具体实现代码\nprint(\"查询XXX\")",
             "prompt_id": "",
-            "prompt_pos": "[47, 47]",
-            "code_pos": "[48, 49]",
+            "prompt_pos": "[48, 48]",
+            "code_pos": "[49, 50]",
             "step_dependencies": "",
             "step_setup": {
                 "step_setup_code": "",
@@ -153,8 +153,8 @@
             "prompt": "后置条件：XXX设置为XXXX",
             "code": "# XXX设置为XXXX的具体实现代码\nprint(\"后置条件：XXX设置为XXXX\")\nprint(\"后置条件：XXX设置为XXXX\")\nprint(\"后置条件：XXX设置为XXXX\")",
             "prompt_id": "",
-            "prompt_pos": "[52, 52]",
-            "code_pos": "[53, 56]",
+            "prompt_pos": "[53, 53]",
+            "code_pos": "[54, 57]",
             "step_dependencies": "",
             "step_setup": {
                 "step_setup_code": "",

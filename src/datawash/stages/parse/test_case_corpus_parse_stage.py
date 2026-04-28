@@ -14,21 +14,25 @@ class TestCaseCorpusParseStage(PipelineStage):
     - prompt_pos 和 code_pos 为闭区间行号
     """
 
-    def process(self, data: List[Tuple[Dict[str, Any], str, ast.ClassDef, List[str]]]) -> List[Tuple[Dict[str, Any], str, List[CodePair]]]:
+    def process(self, data: List[Tuple[Dict[str, Any], str, ast.ClassDef, List[str], str, Dict[str, str]]]) -> List[Tuple[Dict[str, Any], str, List[CodePair], str]]:
         results = []
-        for metadata, class_name, class_node, source_lines in data:
-            code_pairs = self._extract_pairs_from_class(class_node, source_lines)
-            results.append((metadata, class_name, code_pairs))
+        for metadata, class_name, class_node, source_lines, dependencies, import_map in data:
+            code_pairs = self._extract_pairs_from_class(class_node, source_lines, import_map)
+            results.append((metadata, class_name, code_pairs, dependencies))
         return results
 
-    def _extract_pairs_from_class(self, class_node: ast.ClassDef, source_lines: List[str]) -> List[CodePair]:
+    def _extract_pairs_from_class(self, class_node: ast.ClassDef, source_lines: List[str], import_map: Dict[str, str]) -> List[CodePair]:
         raw_pairs = []
         for method in class_node.body:
             if isinstance(method, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 pairs = self._extract_from_body(method.body, source_lines)
                 raw_pairs.extend(pairs)
         return [
-            CodePair(prompt=prompt, code=code, prompt_pos=prompt_pos, code_pos=code_pos, step_index=str(i))
+            CodePair(
+                prompt=prompt, code=code, prompt_pos=prompt_pos, code_pos=code_pos,
+                step_index=str(i),
+                step_dependencies=self._extract_step_dependencies(code, import_map)
+            )
             for i, (prompt, prompt_pos, code, code_pos) in enumerate(raw_pairs)
         ]
 
@@ -140,3 +144,25 @@ class TestCaseCorpusParseStage(PipelineStage):
             line.strip() for line in lines
             if line.strip() and line.strip() != "pass"
         )
+
+    def _extract_step_dependencies(self, code: str, import_map: Dict[str, str]) -> str:
+        """从代码片段中提取引用的 import 依赖"""
+        if not code or not import_map:
+            return ""
+        try:
+            tree = ast.parse(code)
+        except SyntaxError:
+            return ""
+        used_names = set()
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Name):
+                used_names.add(node.id)
+            elif isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name):
+                used_names.add(node.value.id)
+        matched_stmts = []
+        seen = set()
+        for name in used_names:
+            if name in import_map and import_map[name] not in seen:
+                matched_stmts.append(import_map[name])
+                seen.add(import_map[name])
+        return "; ".join(matched_stmts)

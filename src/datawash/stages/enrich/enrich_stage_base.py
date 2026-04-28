@@ -10,7 +10,7 @@ class EnrichStageBase(PipelineStage):
 
     def process(self, data: List[Tuple]) -> List[CorpusItem]:
         result = []
-        for metadata, class_name, code_pairs in data:
-            items = self._enricher.enrich(metadata, (class_name, code_pairs))
+        for metadata, class_name, code_pairs, dependencies in data:
+            items = self._enricher.enrich(metadata, (class_name, code_pairs, dependencies))
             result.extend(items)
         return result

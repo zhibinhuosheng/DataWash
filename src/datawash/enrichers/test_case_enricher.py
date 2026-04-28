@@ -35,13 +35,16 @@ class TestCaseEnricher(Enricher):
     }
 
     def enrich(self, metadata: dict, parsed_data: Any) -> List[TestCaseCorpusItem]:
-        class_name, code_pairs = parsed_data
+        class_name, code_pairs, dependencies = parsed_data
 
         # 按 FIELD_MAPPING 提取字段
         mapped = self._map_fields(metadata)
 
         # 确保 class_name 来自 AST 解析
         mapped["class_name"] = class_name
+
+        # 填入 dependencies（来自 AST import 解析）
+        mapped["dependencies"] = dependencies
 
         # 填入 code_pair_list
         mapped["code_pair_list"] = code_pairs
